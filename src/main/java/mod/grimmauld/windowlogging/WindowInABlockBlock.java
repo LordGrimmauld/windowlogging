@@ -6,6 +6,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.particle.DiggingParticle;
 import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -215,9 +216,8 @@ public class WindowInABlockBlock extends PaneBlock {
 	public boolean addLandingEffects(BlockState state1, ServerWorld world, BlockPos pos, BlockState state2, LivingEntity entity, int numberOfParticles) {
 		WindowInABlockTileEntity te = getTileEntity(world, pos);
 		if (te != null) {
-			te.getPartialBlock().addLandingEffects(world, pos, state2, entity, numberOfParticles / 2);
 			te.getWindowBlock().addLandingEffects(world, pos, state2, entity, numberOfParticles / 2);
-			return true;
+			return te.getPartialBlock().addLandingEffects(world, pos, state2, entity, numberOfParticles / 2);
 		}
 		return false;
 	}
@@ -226,9 +226,8 @@ public class WindowInABlockBlock extends PaneBlock {
 	public boolean addRunningEffects(BlockState state, World world, BlockPos pos, Entity entity) {
 		WindowInABlockTileEntity te = getTileEntity(world, pos);
 		if (te != null) {
-			te.getPartialBlock().addRunningEffects(world, pos, entity);
-			te.getPartialBlock().addRunningEffects(world, pos, entity);
-			return true;
+			te.getWindowBlock().addRunningEffects(world, pos, entity);
+			return te.getPartialBlock().addRunningEffects(world, pos, entity);
 		}
 		return false;
 	}
@@ -238,11 +237,9 @@ public class WindowInABlockBlock extends PaneBlock {
 	public boolean addDestroyEffects(BlockState state, World world, BlockPos pos, ParticleManager manager) {
 		WindowInABlockTileEntity te = getTileEntity(world, pos);
 		if (te != null) {
-			te.getPartialBlock().addDestroyEffects(world, pos, manager);
 			te.getWindowBlock().addDestroyEffects(world, pos, manager);
-			manager.addBlockDestroyEffects(pos, te.getPartialBlock());
 			manager.addBlockDestroyEffects(pos, te.getWindowBlock());
-			return true;
+			return te.getPartialBlock().addDestroyEffects(world, pos, manager);
 		}
 		return false;
 	}
@@ -255,11 +252,9 @@ public class WindowInABlockBlock extends PaneBlock {
 		BlockPos pos = ((BlockRayTraceResult) target).getPos();
 		WindowInABlockTileEntity te = getTileEntity(world, pos);
 		if (te != null) {
-			te.getPartialBlock().addHitEffects(world, target, manager);
 			te.getWindowBlock().addHitEffects(world, target, manager);
-			addBlockHitEffects(manager, pos, (BlockRayTraceResult) target, te.getPartialBlock(), world);
 			addBlockHitEffects(manager, pos, (BlockRayTraceResult) target, te.getWindowBlock(), world);
-			return true;
+			return te.getPartialBlock().addHitEffects(world, target, manager);
 		}
 		return false;
 	}
@@ -300,5 +295,10 @@ public class WindowInABlockBlock extends PaneBlock {
 
 			manager.addEffect((new DiggingParticle(world, d0, d1, d2, 0.0D, 0.0D, 0.0D, blockstate)).setBlockPos(pos).multiplyVelocity(0.2F).multipleParticleScaleBy(0.6F));
 		}
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public IBakedModel createModel(IBakedModel original) {
+		return new WindowInABlockModel(original);
 	}
 }

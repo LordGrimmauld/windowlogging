@@ -4,9 +4,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FourWayBlock;
 import net.minecraft.block.WallBlock;
-import net.minecraft.client.gui.ScreenManager;
+import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.BooleanProperty;
@@ -14,10 +16,12 @@ import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.state.properties.SlabType;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -27,7 +31,11 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 @SuppressWarnings("unused")
 public class EventListener {
@@ -52,7 +60,7 @@ public class EventListener {
 
 	@OnlyIn(Dist.CLIENT)
 	public static void registerRenderers() {
-		ClientRegistry.bindTileEntityRenderer(RegistryEntries.WINDOW_IN_A_BLOCK_TILE_ENTITY, WindowloggedTileEntityRenderer::new);
+		RenderTypeLookup.setRenderLayer(RegistryEntries.WINDOW_IN_A_BLOCK, renderType -> true);
 	}
 
 	@SubscribeEvent
@@ -110,5 +118,36 @@ public class EventListener {
 		}
 
 		event.setCanceled(true);
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public static void onModelBake(ModelBakeEvent event) {
+		Map<ResourceLocation, IBakedModel> modelRegistry = event.getModelRegistry();
+		swapModels(modelRegistry, getAllBlockStateModelLocations(RegistryEntries.WINDOW_IN_A_BLOCK), RegistryEntries.WINDOW_IN_A_BLOCK::createModel);
+
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	protected static List<ModelResourceLocation> getAllBlockStateModelLocations(Block block) {
+		List<ModelResourceLocation> models = new ArrayList<>();
+		block.getStateContainer().getValidStates().forEach(state -> models.add(getBlockModelLocation(block, BlockModelShapes.getPropertyMapString(state.getValues()))));
+		return models;
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	protected static ModelResourceLocation getBlockModelLocation(Block block, String suffix) {
+		return new ModelResourceLocation(block.getRegistryName(), suffix);
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	protected static <T extends IBakedModel> void swapModels(Map<ResourceLocation, IBakedModel> modelRegistry,
+															 ModelResourceLocation location, Function<IBakedModel, T> factory) {
+		modelRegistry.put(location, factory.apply(modelRegistry.get(location)));
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	protected static <T extends IBakedModel> void swapModels(Map<ResourceLocation, IBakedModel> modelRegistry,
+															 List<ModelResourceLocation> locations, Function<IBakedModel, T> factory) {
+		locations.forEach(location -> swapModels(modelRegistry, location, factory));
 	}
 }
