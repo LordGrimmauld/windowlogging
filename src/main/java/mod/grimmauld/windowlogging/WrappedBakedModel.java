@@ -15,12 +15,11 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 import java.util.Random;
 
-@SuppressWarnings("deprecation")
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class WrappedBakedModel implements IBakedModel {
 
-	protected IBakedModel template;
+	protected final IBakedModel template;
 
 	public WrappedBakedModel(IBakedModel template) {
 		this.template = template;

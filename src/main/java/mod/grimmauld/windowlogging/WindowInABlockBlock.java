@@ -38,10 +38,49 @@ import java.util.List;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
+@SuppressWarnings("deprecation")
 public class WindowInABlockBlock extends PaneBlock {
 
 	public WindowInABlockBlock() {
-		super(Properties.create(Material.ROCK));
+		super(Properties.create(Material.ROCK).notSolid());
+	}
+
+	private static void addBlockHitEffects(ParticleManager manager, BlockPos pos, BlockRayTraceResult target, BlockState blockstate, World world) {
+		Direction side = target.getFace();
+		if (blockstate.getRenderType() != BlockRenderType.INVISIBLE) {
+			int i = pos.getX();
+			int j = pos.getY();
+			int k = pos.getZ();
+			AxisAlignedBB axisalignedbb = blockstate.getShape(world, pos).getBoundingBox();
+			double d0 = (double) i + manager.rand.nextDouble() * (axisalignedbb.maxX - axisalignedbb.minX - (double) 0.2F) + (double) 0.1F + axisalignedbb.minX;
+			double d1 = (double) j + manager.rand.nextDouble() * (axisalignedbb.maxY - axisalignedbb.minY - (double) 0.2F) + (double) 0.1F + axisalignedbb.minY;
+			double d2 = (double) k + manager.rand.nextDouble() * (axisalignedbb.maxZ - axisalignedbb.minZ - (double) 0.2F) + (double) 0.1F + axisalignedbb.minZ;
+			if (side == Direction.DOWN) {
+				d1 = (double) j + axisalignedbb.minY - (double) 0.1F;
+			}
+
+			if (side == Direction.UP) {
+				d1 = (double) j + axisalignedbb.maxY + (double) 0.1F;
+			}
+
+			if (side == Direction.NORTH) {
+				d2 = (double) k + axisalignedbb.minZ - (double) 0.1F;
+			}
+
+			if (side == Direction.SOUTH) {
+				d2 = (double) k + axisalignedbb.maxZ + (double) 0.1F;
+			}
+
+			if (side == Direction.WEST) {
+				d0 = (double) i + axisalignedbb.minX - (double) 0.1F;
+			}
+
+			if (side == Direction.EAST) {
+				d0 = (double) i + axisalignedbb.maxX + (double) 0.1F;
+			}
+
+			manager.addEffect((new DiggingParticle(world, d0, d1, d2, 0.0D, 0.0D, 0.0D, blockstate)).setBlockPos(pos).multiplyVelocity(0.2F).multipleParticleScaleBy(0.6F));
+		}
 	}
 
 	@Override
@@ -193,6 +232,7 @@ public class WindowInABlockBlock extends PaneBlock {
 		return Blocks.AIR.getDefaultState();
 	}
 
+	@Override
 	@OnlyIn(Dist.CLIENT)
 	public boolean isSideInvisible(BlockState state, BlockState adjacentBlockState, Direction side) {
 		return false;
@@ -259,46 +299,13 @@ public class WindowInABlockBlock extends PaneBlock {
 		return false;
 	}
 
-	private static void addBlockHitEffects(ParticleManager manager, BlockPos pos, BlockRayTraceResult target, BlockState blockstate, World world) {
-		Direction side = target.getFace();
-		if (blockstate.getRenderType() != BlockRenderType.INVISIBLE) {
-			int i = pos.getX();
-			int j = pos.getY();
-			int k = pos.getZ();
-			AxisAlignedBB axisalignedbb = blockstate.getShape(world, pos).getBoundingBox();
-			double d0 = (double) i + manager.rand.nextDouble() * (axisalignedbb.maxX - axisalignedbb.minX - (double) 0.2F) + (double) 0.1F + axisalignedbb.minX;
-			double d1 = (double) j + manager.rand.nextDouble() * (axisalignedbb.maxY - axisalignedbb.minY - (double) 0.2F) + (double) 0.1F + axisalignedbb.minY;
-			double d2 = (double) k + manager.rand.nextDouble() * (axisalignedbb.maxZ - axisalignedbb.minZ - (double) 0.2F) + (double) 0.1F + axisalignedbb.minZ;
-			if (side == Direction.DOWN) {
-				d1 = (double) j + axisalignedbb.minY - (double) 0.1F;
-			}
-
-			if (side == Direction.UP) {
-				d1 = (double) j + axisalignedbb.maxY + (double) 0.1F;
-			}
-
-			if (side == Direction.NORTH) {
-				d2 = (double) k + axisalignedbb.minZ - (double) 0.1F;
-			}
-
-			if (side == Direction.SOUTH) {
-				d2 = (double) k + axisalignedbb.maxZ + (double) 0.1F;
-			}
-
-			if (side == Direction.WEST) {
-				d0 = (double) i + axisalignedbb.minX - (double) 0.1F;
-			}
-
-			if (side == Direction.EAST) {
-				d0 = (double) i + axisalignedbb.maxX + (double) 0.1F;
-			}
-
-			manager.addEffect((new DiggingParticle(world, d0, d1, d2, 0.0D, 0.0D, 0.0D, blockstate)).setBlockPos(pos).multiplyVelocity(0.2F).multipleParticleScaleBy(0.6F));
-		}
-	}
-
 	@OnlyIn(Dist.CLIENT)
 	public IBakedModel createModel(IBakedModel original) {
 		return new WindowInABlockModel(original);
+	}
+
+	@Override
+	public boolean isNormalCube(BlockState state, IBlockReader worldIn, BlockPos pos) {
+		return false;
 	}
 }

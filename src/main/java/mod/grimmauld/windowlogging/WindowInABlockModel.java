@@ -24,7 +24,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import static mod.grimmauld.windowlogging.WindowInABlockTileEntity.*;
 
@@ -33,6 +32,28 @@ import static mod.grimmauld.windowlogging.WindowInABlockTileEntity.*;
 public class WindowInABlockModel extends WrappedBakedModel {
 	public WindowInABlockModel(IBakedModel original) {
 		super(original);
+	}
+
+	private static void fightZfighting(BakedQuad q) {
+		int[] data = q.getVertexData();
+		Vec3i vec = q.getFace().getDirectionVec();
+		int dirX = vec.getX();
+		int dirY = vec.getY();
+		int dirZ = vec.getZ();
+
+		for (int i = 0; i < 4; ++i) {
+			int j = data.length / 4 * i;
+			float x = Float.intBitsToFloat(data[j]);
+			float y = Float.intBitsToFloat(data[j + 1]);
+			float z = Float.intBitsToFloat(data[j + 2]);
+			double offset = q.getFace().getAxis().getCoordinate(x, y, z);
+
+			if (offset < 1 / 1024d || offset > 1023 / 1024d) {
+				data[j] = Float.floatToIntBits(x - 1 / 512f * dirX);
+				data[j + 1] = Float.floatToIntBits(y - 1 / 512f * dirY);
+				data[j + 2] = Float.floatToIntBits(z - 1 / 512f * dirZ);
+			}
+		}
 	}
 
 	@Override
@@ -69,28 +90,6 @@ public class WindowInABlockModel extends WrappedBakedModel {
 		}
 
 		return quads;
-	}
-
-	protected void fightZfighting(BakedQuad q) {
-		int[] data = q.getVertexData();
-		Vec3i vec = q.getFace().getDirectionVec();
-		int dirX = vec.getX();
-		int dirY = vec.getY();
-		int dirZ = vec.getZ();
-
-		for (int i = 0; i < 4; ++i) {
-			int j = data.length / 4 * i;
-			float x = Float.intBitsToFloat(data[j]);
-			float y = Float.intBitsToFloat(data[j + 1]);
-			float z = Float.intBitsToFloat(data[j + 2]);
-			double offset = q.getFace().getAxis().getCoordinate(x, y, z);
-
-			if (offset < 1 / 1024d || offset > 1023 / 1024d) {
-				data[j] = Float.floatToIntBits(x - 1 / 512f * dirX);
-				data[j + 1] = Float.floatToIntBits(y - 1 / 512f * dirY);
-				data[j + 2] = Float.floatToIntBits(z - 1 / 512f * dirZ);
-			}
-		}
 	}
 
 	@Override

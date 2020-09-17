@@ -5,7 +5,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.FourWayBlock;
 import net.minecraft.block.WallBlock;
 import net.minecraft.client.renderer.BlockModelShapes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
@@ -27,10 +26,10 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,21 +38,6 @@ import java.util.function.Function;
 
 @SuppressWarnings("unused")
 public class EventListener {
-	@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-	public static class RegistryEvents {
-		@SubscribeEvent
-		public static void registerBlocks(final RegistryEvent.Register<Block> event) {
-			Windowlogging.LOGGER.debug("blocks registering");
-			event.getRegistry().register(new WindowInABlockBlock().setRegistryName("window_in_a_block"));
-		}
-
-		@SubscribeEvent
-		public static void registerTEs(final RegistryEvent.Register<TileEntityType<?>> event) {
-			Windowlogging.LOGGER.debug("TEs registering");
-			event.getRegistry().register(TileEntityType.Builder.create(WindowInABlockTileEntity::new, RegistryEntries.WINDOW_IN_A_BLOCK).build(null).setRegistryName("window_in_a_block"));
-		}
-	}
-
 	public static void clientInit(FMLClientSetupEvent event) {
 		registerRenderers();
 	}
@@ -61,6 +45,45 @@ public class EventListener {
 	@OnlyIn(Dist.CLIENT)
 	public static void registerRenderers() {
 		RenderTypeLookup.setRenderLayer(RegistryEntries.WINDOW_IN_A_BLOCK, renderType -> true);
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public static void onModelBake(ModelBakeEvent event) {
+		Map<ResourceLocation, IBakedModel> modelRegistry = event.getModelRegistry();
+		swapModels(modelRegistry, getAllBlockStateModelLocations(RegistryEntries.WINDOW_IN_A_BLOCK), RegistryEntries.WINDOW_IN_A_BLOCK::createModel);
+
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	protected static List<ModelResourceLocation> getAllBlockStateModelLocations(Block block) {
+		List<ModelResourceLocation> models = new ArrayList<>();
+		block.getStateContainer().getValidStates().forEach(state -> {
+			ModelResourceLocation rl = getBlockModelLocation(block, BlockModelShapes.getPropertyMapString(state.getValues()));
+			if (rl != null)
+				models.add(rl);
+		});
+		return models;
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	@Nullable
+	protected static ModelResourceLocation getBlockModelLocation(Block block, String suffix) {
+		ResourceLocation rl = block.getRegistryName();
+		if (rl == null)
+			return null;
+		return new ModelResourceLocation(rl, suffix);
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	protected static <T extends IBakedModel> void swapModels(Map<ResourceLocation, IBakedModel> modelRegistry,
+															 ModelResourceLocation location, Function<IBakedModel, T> factory) {
+		modelRegistry.put(location, factory.apply(modelRegistry.get(location)));
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	protected static <T extends IBakedModel> void swapModels(Map<ResourceLocation, IBakedModel> modelRegistry,
+															 List<ModelResourceLocation> locations, Function<IBakedModel, T> factory) {
+		locations.forEach(location -> swapModels(modelRegistry, location, factory));
 	}
 
 	@SubscribeEvent
@@ -120,34 +143,18 @@ public class EventListener {
 		event.setCanceled(true);
 	}
 
-	@OnlyIn(Dist.CLIENT)
-	public static void onModelBake(ModelBakeEvent event) {
-		Map<ResourceLocation, IBakedModel> modelRegistry = event.getModelRegistry();
-		swapModels(modelRegistry, getAllBlockStateModelLocations(RegistryEntries.WINDOW_IN_A_BLOCK), RegistryEntries.WINDOW_IN_A_BLOCK::createModel);
+	@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+	public static class RegistryEvents {
+		@SubscribeEvent
+		public static void registerBlocks(final RegistryEvent.Register<Block> event) {
+			Windowlogging.LOGGER.debug("blocks registering");
+			event.getRegistry().register(new WindowInABlockBlock().setRegistryName("window_in_a_block"));
+		}
 
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	protected static List<ModelResourceLocation> getAllBlockStateModelLocations(Block block) {
-		List<ModelResourceLocation> models = new ArrayList<>();
-		block.getStateContainer().getValidStates().forEach(state -> models.add(getBlockModelLocation(block, BlockModelShapes.getPropertyMapString(state.getValues()))));
-		return models;
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	protected static ModelResourceLocation getBlockModelLocation(Block block, String suffix) {
-		return new ModelResourceLocation(block.getRegistryName(), suffix);
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	protected static <T extends IBakedModel> void swapModels(Map<ResourceLocation, IBakedModel> modelRegistry,
-															 ModelResourceLocation location, Function<IBakedModel, T> factory) {
-		modelRegistry.put(location, factory.apply(modelRegistry.get(location)));
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	protected static <T extends IBakedModel> void swapModels(Map<ResourceLocation, IBakedModel> modelRegistry,
-															 List<ModelResourceLocation> locations, Function<IBakedModel, T> factory) {
-		locations.forEach(location -> swapModels(modelRegistry, location, factory));
+		@SubscribeEvent
+		public static void registerTEs(final RegistryEvent.Register<TileEntityType<?>> event) {
+			Windowlogging.LOGGER.debug("TEs registering");
+			event.getRegistry().register(TileEntityType.Builder.create(WindowInABlockTileEntity::new, RegistryEntries.WINDOW_IN_A_BLOCK).build(null).setRegistryName("window_in_a_block"));
+		}
 	}
 }

@@ -1,26 +1,26 @@
-modLoader="javafml"
-loaderVersion="[28,)"
+modLoader = "javafml"
+loaderVersion = "[28,)"
 #issueTrackerURL=""
 
 [[mods]]
-    modId="windowlogging"
-    version="${file.jarVersion}"
-    displayName="Windowlogging"
-    #updateJSONURL=""
-    authors="Simibubi, Grimmauld"
-    description='''
+modId = "windowlogging"
+version = "${file.jarVersion}"
+displayName = "Windowlogging"
+#updateJSONURL=""
+authors = "Simibubi, Grimmauld"
+description = '''
 Windowlogging, ported from Create 1.14.4'''
 
 [[dependencies.windowlogging]]
-    modId="forge"
-    mandatory=true
-    versionRange="[31.2.0,)"
-    ordering="NONE"
-    side="BOTH"
+modId = "forge"
+mandatory = true
+versionRange = "[31.2.0,)"
+ordering = "NONE"
+side = "BOTH"
 
 [[dependencies.windowlogging]]
-    modId="minecraft"
-    mandatory=true
-    versionRange="[1.15.2,1.16)"
-    ordering="NONE"
-    side="BOTH"
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.15.2,1.16)"
+ordering = "NONE"
+side = "BOTH"
