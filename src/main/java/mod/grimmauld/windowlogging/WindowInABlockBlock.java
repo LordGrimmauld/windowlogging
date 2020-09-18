@@ -3,16 +3,19 @@ package mod.grimmauld.windowlogging;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.particle.DiggingParticle;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.IFluidState;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameters;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -22,12 +25,13 @@ import net.minecraft.util.math.RayTraceContext.FluidMode;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.*;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.loot.LootContext.Builder;
-import net.minecraft.world.storage.loot.LootParameters;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.extensions.IForgeBlock;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -39,13 +43,13 @@ import java.util.List;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @SuppressWarnings("deprecation")
-public class WindowInABlockBlock extends PaneBlock {
+public class WindowInABlockBlock extends PaneBlock implements IForgeBlock {
 
 	public WindowInABlockBlock() {
 		super(Properties.create(Material.ROCK).notSolid());
 	}
 
-	private static void addBlockHitEffects(ParticleManager manager, BlockPos pos, BlockRayTraceResult target, BlockState blockstate, World world) {
+	private static void addBlockHitEffects(ParticleManager manager, BlockPos pos, BlockRayTraceResult target, BlockState blockstate, ClientWorld world) {
 		Direction side = target.getFace();
 		if (blockstate.getRenderType() != BlockRenderType.INVISIBLE) {
 			int i = pos.getX();
@@ -79,7 +83,7 @@ public class WindowInABlockBlock extends PaneBlock {
 				d0 = (double) i + axisalignedbb.maxX + (double) 0.1F;
 			}
 
-			manager.addEffect((new DiggingParticle(world, d0, d1, d2, 0.0D, 0.0D, 0.0D, blockstate)).setBlockPos(pos).multiplyVelocity(0.2F).multipleParticleScaleBy(0.6F));
+			manager.addEffect((new DiggingParticle(world, d0, d1, d2, 0.0D, 0.0D, 0.0D, blockstate)).setBlockPos(pos).multiplyVelocity(0.2F).multiplyParticleScaleBy(0.6F));
 		}
 	}
 
@@ -95,12 +99,15 @@ public class WindowInABlockBlock extends PaneBlock {
 
 	@Override
 	public boolean removedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player,
-								   boolean willHarvest, IFluidState fluid) {
+								   boolean willHarvest, FluidState fluid) {
 		if (player == null)
 			return super.removedByPlayer(state, world, pos, null, willHarvest, fluid);
 
-		Vec3d start = player.getEyePosition(1);
-		Vec3d end = start.add(player.getLookVec().scale(player.getAttribute(PlayerEntity.REACH_DISTANCE).getValue()));
+		Vector3d start = player.getEyePosition(1);
+		ModifiableAttributeInstance reachDistanceAttribute = player.getAttribute(ForgeMod.REACH_DISTANCE.get());
+		if (reachDistanceAttribute == null)
+			return super.removedByPlayer(state, world, pos, null, willHarvest, fluid);
+		Vector3d end = start.add(player.getLookVec().scale(reachDistanceAttribute.getValue()));
 		BlockRayTraceResult target =
 			world.rayTraceBlocks(new RayTraceContext(start, end, BlockMode.OUTLINE, FluidMode.NONE, player));
 		WindowInABlockTileEntity tileEntity = getTileEntity(world, pos);
@@ -108,7 +115,7 @@ public class WindowInABlockBlock extends PaneBlock {
 			return super.removedByPlayer(state, world, pos, player, willHarvest, fluid);
 		BlockState windowBlock = tileEntity.getWindowBlock();
 		for (AxisAlignedBB bb : windowBlock.getShape(world, pos).toBoundingBoxList()) {
-			if (bb.grow(.1d).contains(target.getHitVec().subtract(new Vec3d(pos)))) {
+			if (bb.grow(.1d).contains(target.getHitVec().subtract(pos.getX(), pos.getY(), pos.getZ()))) {
 				windowBlock.getBlock().onBlockHarvested(world, pos, windowBlock, player);
 				Block.spawnDrops(windowBlock, world, pos, null, player, player.getHeldItemMainhand());
 				BlockState partialBlock = tileEntity.getPartialBlock();
@@ -145,14 +152,13 @@ public class WindowInABlockBlock extends PaneBlock {
 	}
 
 	@Override
-	public float getBlockHardness(BlockState blockState, IBlockReader worldIn, BlockPos pos) {
-		return getSurroundingBlockState(worldIn, pos).getBlockHardness(worldIn, pos);
+	public float getPlayerRelativeBlockHardness(BlockState state, PlayerEntity player, IBlockReader worldIn, BlockPos pos) {
+		return getSurroundingBlockState(worldIn, pos).getPlayerRelativeBlockHardness(player, worldIn, pos);
 	}
 
 	@Override
-	public float getExplosionResistance(BlockState state, IWorldReader world, BlockPos pos, @Nullable Entity exploder,
-										Explosion explosion) {
-		return getSurroundingBlockState(world, pos).getExplosionResistance(world, pos, exploder, explosion);
+	public float getExplosionResistance(BlockState state, IBlockReader world, BlockPos pos, Explosion explosion) {
+		return getSurroundingBlockState(world, pos).getExplosionResistance(world, pos, explosion);
 	}
 
 	@Override
@@ -160,7 +166,7 @@ public class WindowInABlockBlock extends PaneBlock {
 								  PlayerEntity player) {
 		BlockState window = getWindowBlockState(world, pos);
 		for (AxisAlignedBB bb : window.getShape(world, pos).toBoundingBoxList()) {
-			if (bb.grow(.1d).contains(target.getHitVec().subtract(new Vec3d(pos))))
+			if (bb.grow(.1d).contains(target.getHitVec().subtract(pos.getX(), pos.getY(), pos.getZ())))
 				return window.getPickBlock(target, world, pos, player);
 		}
 		BlockState surrounding = getSurroundingBlockState(world, pos);
@@ -168,7 +174,7 @@ public class WindowInABlockBlock extends PaneBlock {
 	}
 
 	@Override
-	public List<ItemStack> getDrops(BlockState state, Builder builder) {
+	public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
 		TileEntity tileentity = builder.get(LootParameters.BLOCK_ENTITY);
 		if (!(tileentity instanceof WindowInABlockTileEntity))
 			return Collections.emptyList();
@@ -190,11 +196,6 @@ public class WindowInABlockBlock extends PaneBlock {
 	public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos,
 										ISelectionContext context) {
 		return getShape(state, worldIn, pos, context);
-	}
-
-	@Override
-	public MaterialColor getMaterialColor(BlockState state, IBlockReader worldIn, BlockPos pos) {
-		return getSurroundingBlockState(worldIn, pos).getMaterialColor(worldIn, pos);
 	}
 
 	@Override
@@ -291,9 +292,9 @@ public class WindowInABlockBlock extends PaneBlock {
 			return false;
 		BlockPos pos = ((BlockRayTraceResult) target).getPos();
 		WindowInABlockTileEntity te = getTileEntity(world, pos);
-		if (te != null) {
+		if (te != null && world instanceof ClientWorld) {
 			te.getWindowBlock().addHitEffects(world, target, manager);
-			addBlockHitEffects(manager, pos, (BlockRayTraceResult) target, te.getWindowBlock(), world);
+			addBlockHitEffects(manager, pos, (BlockRayTraceResult) target, te.getWindowBlock(), (ClientWorld) world);
 			return te.getPartialBlock().addHitEffects(world, target, manager);
 		}
 		return false;
@@ -302,10 +303,5 @@ public class WindowInABlockBlock extends PaneBlock {
 	@OnlyIn(Dist.CLIENT)
 	public IBakedModel createModel(IBakedModel original) {
 		return new WindowInABlockModel(original);
-	}
-
-	@Override
-	public boolean isNormalCube(BlockState state, IBlockReader worldIn, BlockPos pos) {
-		return false;
 	}
 }

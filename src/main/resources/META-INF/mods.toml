@@ -14,13 +14,13 @@ Windowlogging, ported from Create 1.14.4'''
 [[dependencies.windowlogging]]
 modId = "forge"
 mandatory = true
-versionRange = "[31.2.0,)"
+versionRange="[32,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.windowlogging]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.15.2,1.16)"
+versionRange = "[1.16.1]"
 ordering = "NONE"
 side = "BOTH"

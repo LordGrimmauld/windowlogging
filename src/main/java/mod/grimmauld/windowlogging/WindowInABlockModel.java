@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
@@ -36,7 +36,7 @@ public class WindowInABlockModel extends WrappedBakedModel {
 
 	private static void fightZfighting(BakedQuad q) {
 		int[] data = q.getVertexData();
-		Vec3i vec = q.getFace().getDirectionVec();
+		Vector3i vec = q.getFace().getDirectionVec();
 		int dirX = vec.getX();
 		int dirY = vec.getY();
 		int dirZ = vec.getZ();

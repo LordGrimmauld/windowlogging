@@ -113,7 +113,7 @@ public class EventListener {
 			return;
 		if (blockState.getBlock() instanceof WindowInABlockBlock)
 			return;
-		if (blockState.has(BlockStateProperties.SLAB_TYPE) && blockState.get(BlockStateProperties.SLAB_TYPE) == SlabType.DOUBLE)
+		if (blockState.func_235903_d_(BlockStateProperties.SLAB_TYPE).orElse(null)  == SlabType.DOUBLE)
 			return;
 
 		BlockState defaultState = RegistryEntries.WINDOW_IN_A_BLOCK.getDefaultState();
