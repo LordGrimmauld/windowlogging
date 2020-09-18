@@ -12,9 +12,11 @@ import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.world.IBlockReader;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
@@ -82,7 +84,7 @@ public class WindowInABlockModel extends WrappedBakedModel {
 			IModelData glassModelData = windowModel.getModelData(world, position, windowState, EmptyModelData.INSTANCE);
 			dispatcher.getModelForState(windowState).getQuads(windowState, side, rand, glassModelData)
 				.forEach(bakedQuad -> {
-					if (!Block.hasSolidSide(partialState, world, position, bakedQuad.getFace())) {
+					if (!hasSolidSide(partialState, world, position, bakedQuad.getFace())) {
 						fightZfighting(bakedQuad);
 						quads.add(bakedQuad);
 					}
@@ -105,5 +107,9 @@ public class WindowInABlockModel extends WrappedBakedModel {
 	public boolean isAmbientOcclusion() {
 		RenderType renderLayer = MinecraftForgeClient.getRenderLayer();
 		return renderLayer == RenderType.getSolid();
+	}
+
+	private static boolean hasSolidSide(BlockState state, IBlockReader worldIn, BlockPos pos, Direction side) {
+		return !state.isIn(BlockTags.LEAVES) && Block.doesSideFillSquare(state.getCollisionShape(worldIn, pos), side);
 	}
 }
