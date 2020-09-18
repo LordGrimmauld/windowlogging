@@ -1,9 +1,6 @@
 package mod.grimmauld.windowlogging;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.FourWayBlock;
-import net.minecraft.block.WallBlock;
+import net.minecraft.block.*;
 import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.model.IBakedModel;
@@ -16,6 +13,7 @@ import net.minecraft.state.properties.SlabType;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -123,6 +121,8 @@ public class EventListener {
 			WindowInABlockTileEntity wte = (WindowInABlockTileEntity) te;
 			wte.setWindowBlock(item.getBlock().getDefaultState());
 			wte.updateWindowConnections();
+			SoundType soundtype = wte.getWindowBlock().getSoundType(world, pos, event.getPlayer());
+			world.playSound(null, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
 
 			if (blockState.getBlock() instanceof FourWayBlock) {
 				for (BooleanProperty side : Arrays.asList(FourWayBlock.EAST, FourWayBlock.NORTH, FourWayBlock.SOUTH,
