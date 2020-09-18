@@ -83,7 +83,7 @@ public class WindowInABlockBlock extends PaneBlock implements IForgeBlock {
 				d0 = (double) i + axisalignedbb.maxX + (double) 0.1F;
 			}
 
-			manager.addEffect((new DiggingParticle(world, d0, d1, d2, 0.0D, 0.0D, 0.0D, blockstate)).setBlockPos(pos).multiplyVelocity(0.2F).multiplyParticleScaleBy(0.6F));
+			manager.addEffect((new DiggingParticle(world, d0, d1, d2, 0.0D, 0.0D, 0.0D, blockstate)).setBlockPos(pos).multiplyVelocity(0.2F).multipleParticleScaleBy(0.6F));
 		}
 	}
 

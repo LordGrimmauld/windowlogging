@@ -41,8 +41,8 @@ public class WrappedBakedModel implements IBakedModel {
 	}
 
 	@Override
-	public boolean isSideLit() {
-		return template.isSideLit();
+	public boolean func_230044_c_() {
+		return template.func_230044_c_();
 	}
 
 	@Override

@@ -43,10 +43,10 @@ public class WindowInABlockTileEntity extends TileEntity {
 	}
 
 	@Override
-	public void read(BlockState state, CompoundNBT compound) {
+	public void func_230337_a_(BlockState state, CompoundNBT compound) {
 		partialBlock = NBTUtil.readBlockState(compound.getCompound("PartialBlock"));
 		windowBlock = NBTUtil.readBlockState(compound.getCompound("WindowBlock"));
-		super.read(state, compound);
+		super.func_230337_a_(state, compound);
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public class WindowInABlockTileEntity extends TileEntity {
 
 	@Override
 	public void handleUpdateTag(BlockState state, CompoundNBT tag) {
-		read(state, tag);
+		func_230337_a_(state, tag);
 	}
 
 	@Override
@@ -110,6 +110,6 @@ public class WindowInABlockTileEntity extends TileEntity {
 
 	@Override
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-		read(getBlockState(), pkt.getNbtCompound());
+		func_230337_a_(getBlockState(), pkt.getNbtCompound());
 	}
 }

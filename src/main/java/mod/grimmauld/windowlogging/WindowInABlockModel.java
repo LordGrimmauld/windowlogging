@@ -110,6 +110,6 @@ public class WindowInABlockModel extends WrappedBakedModel {
 	}
 
 	private static boolean hasSolidSide(BlockState state, IBlockReader worldIn, BlockPos pos, Direction side) {
-		return !state.isIn(BlockTags.LEAVES) && Block.doesSideFillSquare(state.getCollisionShape(worldIn, pos), side);
+		return !state.getBlock().isIn(BlockTags.LEAVES) && Block.doesSideFillSquare(state.getCollisionShape(worldIn, pos), side);
 	}
 }

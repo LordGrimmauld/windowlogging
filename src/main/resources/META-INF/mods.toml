@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[33,)"
+loaderVersion = "[34,)"
 #issueTrackerURL=""
 
 [[mods]]
@@ -14,13 +14,13 @@ Windowlogging, ported from Create 1.14.4'''
 [[dependencies.windowlogging]]
 modId = "forge"
 mandatory = true
-versionRange="[33,)"
+versionRange="[34,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.windowlogging]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.16.2]"
+versionRange = "[1.16.3]"
 ordering = "NONE"
 side = "BOTH"
