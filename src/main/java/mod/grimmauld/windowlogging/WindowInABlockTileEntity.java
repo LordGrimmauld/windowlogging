@@ -17,99 +17,133 @@ import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.fml.DistExecutor;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class WindowInABlockTileEntity extends TileEntity {
+    public static final ModelProperty<BlockState> PARTIAL_BLOCK = new ModelProperty<>();
+    public static final ModelProperty<BlockState> WINDOW_BLOCK = new ModelProperty<>();
+    public static final ModelProperty<BlockPos> POSITION = new ModelProperty<>();
+    public static final ModelProperty<TileEntity> PARTIAL_TE = new ModelProperty<>();
+    private BlockState partialBlock = Blocks.AIR.getDefaultState();
+    private BlockState windowBlock = Blocks.AIR.getDefaultState();
+    private CompoundNBT partialBlockTileData;
+    private TileEntity partialBlockTileEntity = null;
+    @OnlyIn(value = Dist.CLIENT)
+    private IModelData modelData;
 
-	public static final ModelProperty<BlockState> PARTIAL_BLOCK = new ModelProperty<>();
-	public static final ModelProperty<BlockState> WINDOW_BLOCK = new ModelProperty<>();
-	public static final ModelProperty<BlockPos> POSITION = new ModelProperty<>();
-	private BlockState partialBlock = Blocks.AIR.getDefaultState();
-	private BlockState windowBlock = Blocks.AIR.getDefaultState();
-	@OnlyIn(value = Dist.CLIENT)
-	private IModelData modelData;
+    public WindowInABlockTileEntity() {
+        super(RegistryEntries.WINDOW_IN_A_BLOCK_TILE_ENTITY);
+        setPartialBlockTileData(new CompoundNBT());
+        DistExecutor.runWhenOn(Dist.CLIENT, () -> this::initDataMap);
+    }
 
-	public WindowInABlockTileEntity() {
-		super(RegistryEntries.WINDOW_IN_A_BLOCK_TILE_ENTITY);
-		DistExecutor.runWhenOn(Dist.CLIENT, () -> this::initDataMap);
-	}
+    public CompoundNBT getPartialBlockTileData() {
+        return partialBlockTileData;
+    }
 
-	@OnlyIn(value = Dist.CLIENT)
-	private void initDataMap() {
-		modelData = new ModelDataMap.Builder().withInitial(WINDOW_BLOCK, Blocks.AIR.getDefaultState())
-			.withInitial(PARTIAL_BLOCK, Blocks.AIR.getDefaultState()).withInitial(POSITION, BlockPos.ZERO).build();
-	}
+    public void setPartialBlockTileData(CompoundNBT partialBlockTileData) {
+        this.partialBlockTileData = partialBlockTileData;
+    }
 
-	@Override
-	public void func_230337_a_(BlockState state, CompoundNBT compound) {
-		partialBlock = NBTUtil.readBlockState(compound.getCompound("PartialBlock"));
-		windowBlock = NBTUtil.readBlockState(compound.getCompound("WindowBlock"));
-		super.func_230337_a_(state, compound);
-	}
+    @OnlyIn(value = Dist.CLIENT)
+    private void initDataMap() {
+        modelData = new ModelDataMap.Builder().withInitial(WINDOW_BLOCK, Blocks.AIR.getDefaultState())
+                .withInitial(PARTIAL_BLOCK, Blocks.AIR.getDefaultState()).withInitial(POSITION, BlockPos.ZERO).withInitial(PARTIAL_TE, null).build();
+    }
 
-	@Override
-	public CompoundNBT write(CompoundNBT compound) {
-		compound.put("PartialBlock", NBTUtil.writeBlockState(getPartialBlock()));
-		compound.put("WindowBlock", NBTUtil.writeBlockState(getWindowBlock()));
-		return super.write(compound);
-	}
+    @Override
+    public void func_230337_a_(BlockState state, CompoundNBT compound) {
+        partialBlock = NBTUtil.readBlockState(compound.getCompound("PartialBlock"));
+        windowBlock = NBTUtil.readBlockState(compound.getCompound("WindowBlock"));
+        setPartialBlockTileData(compound.getCompound("PartialData"));
+        super.func_230337_a_(state, compound);
+    }
 
-	public void updateWindowConnections() {
-		if (world == null)
-			return;
-		for (Direction side : Direction.values()) {
-			BlockPos offsetPos = pos.offset(side);
-			windowBlock = getWindowBlock().updatePostPlacement(side, world.getBlockState(offsetPos), world, pos,
-				offsetPos);
-		}
-		world.notifyBlockUpdate(getPos(), getBlockState(), getBlockState(), 2 | 16);
-		markDirty();
-	}
+    @Override
+    public CompoundNBT write(CompoundNBT compound) {
+        compound.put("PartialBlock", NBTUtil.writeBlockState(getPartialBlock()));
+        compound.put("WindowBlock", NBTUtil.writeBlockState(getWindowBlock()));
+        compound.put("PartialData", partialBlockTileData);
+        return super.write(compound);
+    }
 
-	@OnlyIn(value = Dist.CLIENT)
-	@Override
-	public IModelData getModelData() {
-		modelData.setData(PARTIAL_BLOCK, partialBlock);
-		modelData.setData(WINDOW_BLOCK, windowBlock);
-		modelData.setData(POSITION, pos);
-		return modelData;
-	}
+    public void updateWindowConnections() {
+        if (world == null)
+            return;
+        for (Direction side : Direction.values()) {
+            BlockPos offsetPos = pos.offset(side);
+            windowBlock = getWindowBlock().updatePostPlacement(side, world.getBlockState(offsetPos), world, pos,
+                    offsetPos);
+        }
+        world.notifyBlockUpdate(getPos(), getBlockState(), getBlockState(), 2 | 16);
+        markDirty();
+    }
 
-	public BlockState getPartialBlock() {
-		return partialBlock;
-	}
+    @OnlyIn(value = Dist.CLIENT)
+    @Override
+    public IModelData getModelData() {
+        modelData.setData(PARTIAL_BLOCK, partialBlock);
+        modelData.setData(WINDOW_BLOCK, windowBlock);
+        modelData.setData(POSITION, pos);
+        modelData.setData(PARTIAL_TE, getPartialBlockTileEntityIfPresent());
+        return modelData;
+    }
 
-	public void setPartialBlock(BlockState partialBlock) {
-		this.partialBlock = partialBlock;
-	}
+    public BlockState getPartialBlock() {
+        return partialBlock;
+    }
 
-	public BlockState getWindowBlock() {
-		return windowBlock;
-	}
+    public void setPartialBlock(BlockState partialBlock) {
+        this.partialBlock = partialBlock;
+    }
 
-	public void setWindowBlock(BlockState windowBlock) {
-		this.windowBlock = windowBlock;
-	}
+    public BlockState getWindowBlock() {
+        return windowBlock;
+    }
 
-	@Override
-	public CompoundNBT getUpdateTag() {
-		return write(new CompoundNBT());
-	}
+    public void setWindowBlock(BlockState windowBlock) {
+        this.windowBlock = windowBlock;
+    }
 
-	@Override
-	public void handleUpdateTag(BlockState state, CompoundNBT tag) {
-		func_230337_a_(state, tag);
-	}
+    @Override
+    public CompoundNBT getUpdateTag() {
+        return write(new CompoundNBT());
+    }
 
-	@Override
-	public SUpdateTileEntityPacket getUpdatePacket() {
-		return new SUpdateTileEntityPacket(getPos(), 1, write(new CompoundNBT()));
-	}
+    @Override
+    public void handleUpdateTag(BlockState state, CompoundNBT tag) {
+        func_230337_a_(state, tag);
+    }
 
-	@Override
-	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-		func_230337_a_(getBlockState(), pkt.getNbtCompound());
-	}
+    @Override
+    public SUpdateTileEntityPacket getUpdatePacket() {
+        return new SUpdateTileEntityPacket(getPos(), 1, write(new CompoundNBT()));
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+        func_230337_a_(getBlockState(), pkt.getNbtCompound());
+    }
+
+    @Nullable
+    public TileEntity getPartialBlockTileEntityIfPresent() {
+        if (!getPartialBlock().hasTileEntity())
+            return null;
+        if (partialBlockTileEntity == null) {
+            try {
+                partialBlockTileEntity = getPartialBlock().createTileEntity(world);
+                if (partialBlockTileEntity != null) {
+                    partialBlockTileEntity.cachedBlockState = getPartialBlock();
+                    partialBlockTileEntity.deserializeNBT(partialBlockTileData);
+                    partialBlockTileEntity.setWorldAndPos(world, pos);
+                }
+            } catch (Throwable e) {
+                partialBlockTileEntity = null;
+            }
+        }
+        return partialBlockTileEntity;
+    }
 }

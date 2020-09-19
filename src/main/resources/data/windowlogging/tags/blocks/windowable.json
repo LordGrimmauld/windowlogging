@@ -11,5 +11,8 @@
     "#forge:fences",
     "#forge:fences/wooden",
     "#forge:fences/nether_brick"
+  ],
+  "optional": [
+    "doubleslabs:vertical_slab"
   ]
 }
