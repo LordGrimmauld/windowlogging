@@ -18,61 +18,59 @@ import java.util.Random;
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class WrappedBakedModel implements IBakedModel {
+    protected final IBakedModel template;
 
-	protected final IBakedModel template;
+    public WrappedBakedModel(IBakedModel template) {
+        this.template = template;
+    }
 
-	public WrappedBakedModel(IBakedModel template) {
-		this.template = template;
-	}
+    @Override
+    public IBakedModel getBakedModel() {
+        return template;
+    }
 
-	@Override
-	public IBakedModel getBakedModel() {
-		return template;
-	}
+    @Override
+    public boolean isAmbientOcclusion() {
+        return template.isAmbientOcclusion();
+    }
 
-	@Override
-	public boolean isAmbientOcclusion() {
-		return template.isAmbientOcclusion();
-	}
+    @Override
+    public boolean isGui3d() {
+        return template.isGui3d();
+    }
 
-	@Override
-	public boolean isGui3d() {
-		return template.isGui3d();
-	}
+    @Override
+    public boolean isSideLit() {
+        return template.isSideLit();
+    }
 
-	@Override
-	public boolean isSideLit() {
-		return template.isSideLit();
-	}
+    @Override
+    public boolean isBuiltInRenderer() {
+        return template.isBuiltInRenderer();
+    }
 
-	@Override
-	public boolean isBuiltInRenderer() {
-		return template.isBuiltInRenderer();
-	}
+    @Override
+    public TextureAtlasSprite getParticleTexture(IModelData data) {
+        return template.getParticleTexture(data);
+    }
 
-	@Override
-	public TextureAtlasSprite getParticleTexture(IModelData data) {
-		return template.getParticleTexture(data);
-	}
+    @Override
+    public ItemOverrideList getOverrides() {
+        return template.getOverrides();
+    }
 
-	@Override
-	public ItemOverrideList getOverrides() {
-		return template.getOverrides();
-	}
+    @Override
+    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, Random rand) {
+        return getQuads(state, side, rand, EmptyModelData.INSTANCE);
+    }
 
-	@Override
-	public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, Random rand) {
-		return getQuads(state, side, rand, EmptyModelData.INSTANCE);
-	}
+    @Override
+    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, Random rand, IModelData data) {
+        return template.getQuads(state, side, rand, data);
+    }
 
-	@Override
-	public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, Random rand, IModelData data) {
-		return template.getQuads(state, side, rand, data);
-	}
-
-	@Override
-	public TextureAtlasSprite getParticleTexture() {
-		return getParticleTexture(EmptyModelData.INSTANCE);
-	}
-
+    @Override
+    public TextureAtlasSprite getParticleTexture() {
+        return getParticleTexture(EmptyModelData.INSTANCE);
+    }
 }
