@@ -10,7 +10,6 @@ import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.IModelData;
@@ -28,6 +27,7 @@ public class WindowInABlockTileEntity extends TileEntity {
     public static final ModelProperty<BlockState> PARTIAL_BLOCK = new ModelProperty<>();
     public static final ModelProperty<BlockState> WINDOW_BLOCK = new ModelProperty<>();
     public static final ModelProperty<BlockPos> POSITION = new ModelProperty<>();
+    public static final ModelProperty<TileEntity> PARTIAL_TE = new ModelProperty<>();
     private BlockState partialBlock = Blocks.AIR.getDefaultState();
     private BlockState windowBlock = Blocks.AIR.getDefaultState();
     private CompoundNBT partialBlockTileData;
@@ -52,7 +52,7 @@ public class WindowInABlockTileEntity extends TileEntity {
     @OnlyIn(value = Dist.CLIENT)
     private void initDataMap() {
         modelData = new ModelDataMap.Builder().withInitial(WINDOW_BLOCK, Blocks.AIR.getDefaultState())
-                .withInitial(PARTIAL_BLOCK, Blocks.AIR.getDefaultState()).withInitial(POSITION, BlockPos.ZERO).build();
+                .withInitial(PARTIAL_BLOCK, Blocks.AIR.getDefaultState()).withInitial(POSITION, BlockPos.ZERO).withInitial(PARTIAL_TE, null).build();
     }
 
     @Override
@@ -89,6 +89,7 @@ public class WindowInABlockTileEntity extends TileEntity {
         modelData.setData(PARTIAL_BLOCK, partialBlock);
         modelData.setData(WINDOW_BLOCK, windowBlock);
         modelData.setData(POSITION, pos);
+        modelData.setData(PARTIAL_TE, getPartialBlockTileEntityIfPresent());
         return modelData;
     }
 

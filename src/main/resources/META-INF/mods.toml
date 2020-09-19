@@ -1,11 +1,11 @@
 modLoader = "javafml"
 license="MIT license"
-loaderVersion = "[28,)"
+loaderVersion = "[31,)"
 #issueTrackerURL=""
 
 [[mods]]
 modId = "windowlogging"
-version = "${file.jarVersion}"
+version = "0.0.2"
 displayName = "Windowlogging"
 #updateJSONURL=""
 authors = "Simibubi, Grimmauld"
@@ -22,6 +22,6 @@ side = "BOTH"
 [[dependencies.windowlogging]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.15.2,1.16)"
+versionRange = "[1.15.2,)"
 ordering = "NONE"
 side = "BOTH"

@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
@@ -63,6 +64,7 @@ public class WindowInABlockModel extends WrappedBakedModel {
         BlockState partialState = data.getData(PARTIAL_BLOCK);
         BlockState windowState = data.getData(WINDOW_BLOCK);
         BlockPos position = data.getData(POSITION);
+        TileEntity partialTE = data.getData(PARTIAL_TE);
         ClientWorld world = Minecraft.getInstance().world;
         List<BakedQuad> quads = new ArrayList<>();
         if (world == null || position == null)
@@ -75,7 +77,7 @@ public class WindowInABlockModel extends WrappedBakedModel {
         if (RenderTypeLookup.canRenderInLayer(partialState, renderType) && partialState.getRenderType() == BlockRenderType.MODEL) {
             IBakedModel partialModel = dispatcher.getModelForState(partialState);
             IModelData modelData = partialModel.getModelData(world, position, partialState,
-                    EmptyModelData.INSTANCE);
+                    partialTE == null ? EmptyModelData.INSTANCE : partialTE.getModelData());
             quads.addAll(partialModel.getQuads(partialState, side, rand, modelData));
         }
         if (RenderTypeLookup.canRenderInLayer(windowState, renderType)) {
@@ -89,7 +91,6 @@ public class WindowInABlockModel extends WrappedBakedModel {
                         }
                     });
         }
-
         return quads;
     }
 
@@ -97,9 +98,10 @@ public class WindowInABlockModel extends WrappedBakedModel {
     public TextureAtlasSprite getParticleTexture(IModelData data) {
         BlockRendererDispatcher dispatcher = Minecraft.getInstance().getBlockRendererDispatcher();
         BlockState partialState = data.getData(PARTIAL_BLOCK);
+        TileEntity partialTE = data.getData(PARTIAL_TE);
         if (partialState == null)
             return super.getParticleTexture(data);
-        return dispatcher.getModelForState(partialState).getParticleTexture(data);
+        return dispatcher.getModelForState(partialState).getParticleTexture(partialTE == null ? data : partialTE.getModelData());
     }
 
     @Override
