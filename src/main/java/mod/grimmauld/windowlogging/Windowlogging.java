@@ -11,15 +11,15 @@ import org.apache.logging.log4j.Logger;
 
 @Mod(Windowlogging.MODID)
 public class Windowlogging {
-	public static final String MODID = "windowlogging";
-	public static final Logger LOGGER = LogManager.getLogger(MODID);
-	public static final ResourceLocation WindowableBlockTagLocation = new ResourceLocation(MODID, "windowable");
+    public static final String MODID = "windowlogging";
+    public static final Logger LOGGER = LogManager.getLogger(MODID);
+    public static final ResourceLocation WindowableBlockTagLocation = new ResourceLocation(MODID, "windowable");
 
-	public Windowlogging() {
-		MinecraftForge.EVENT_BUS.register(new EventListener());
-		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
-			FMLJavaModLoadingContext.get().getModEventBus().addListener(EventListener::clientInit);
-			FMLJavaModLoadingContext.get().getModEventBus().addListener(EventListener::onModelBake);
-		});
-	}
+    public Windowlogging() {
+        MinecraftForge.EVENT_BUS.register(new EventListener());
+        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
+            FMLJavaModLoadingContext.get().getModEventBus().addListener(EventListener::clientInit);
+            FMLJavaModLoadingContext.get().getModEventBus().addListener(EventListener::onModelBake);
+        });
+    }
 }

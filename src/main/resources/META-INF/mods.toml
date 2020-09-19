@@ -1,10 +1,11 @@
 modLoader = "javafml"
-loaderVersion = "[28,)"
+license = "MIT license"
+loaderVersion = "[32,)"
 #issueTrackerURL=""
 
 [[mods]]
 modId = "windowlogging"
-version = "${file.jarVersion}"
+version = "0.0.2"
 displayName = "Windowlogging"
 #updateJSONURL=""
 authors = "Simibubi, Grimmauld"
@@ -14,7 +15,7 @@ Windowlogging, ported from Create 1.14.4'''
 [[dependencies.windowlogging]]
 modId = "forge"
 mandatory = true
-versionRange="[32,)"
+versionRange = "[32,)"
 ordering = "NONE"
 side = "BOTH"
 
