@@ -317,4 +317,14 @@ public class WindowInABlockBlock extends PaneBlock {
     public boolean isNormalCube(BlockState state, IBlockReader worldIn, BlockPos pos) {
         return false;
     }
+
+    @Override
+    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
+        WindowInABlockTileEntity te = getTileEntity(world, pos);
+        if (te != null) {
+            BlockState partialState = te.getPartialBlock();
+            partialState.getBlock().getLightValue(partialState, world, pos);
+        }
+        return 0;
+    }
 }
