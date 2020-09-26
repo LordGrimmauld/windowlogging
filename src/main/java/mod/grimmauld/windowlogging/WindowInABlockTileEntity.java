@@ -147,4 +147,9 @@ public class WindowInABlockTileEntity extends TileEntity {
         }
         return partialBlockTileEntity;
     }
+
+    @Override
+    public boolean canRenderBreaking() {
+        return true;
+    }
 }
