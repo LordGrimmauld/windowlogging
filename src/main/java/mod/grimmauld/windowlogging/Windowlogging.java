@@ -17,7 +17,7 @@ public class Windowlogging {
 
     public Windowlogging() {
         MinecraftForge.EVENT_BUS.register(new EventListener());
-        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
+        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> () -> {
             FMLJavaModLoadingContext.get().getModEventBus().addListener(EventListener::clientInit);
             FMLJavaModLoadingContext.get().getModEventBus().addListener(EventListener::onModelBake);
         });

@@ -26,7 +26,7 @@ public class WindowInABlockTileEntityRenderer extends TileEntityRenderer<WindowI
             return;
         try {
             renderer.render(partialTE, partialTicks, matrixStackIn, bufferIn, combinedLightIn, combinedOverlayIn);
-        } catch (Throwable ignored) {
+        } catch (Exception ignored) {
         }
     }
 }

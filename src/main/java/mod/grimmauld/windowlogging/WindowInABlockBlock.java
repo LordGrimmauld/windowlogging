@@ -95,7 +95,7 @@ public class WindowInABlockBlock extends PaneBlock {
     }
 
     @Override
-    public boolean removedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player,
+    public boolean removedByPlayer(BlockState state, World world, BlockPos pos, @Nullable PlayerEntity player,
                                    boolean willHarvest, IFluidState fluid) {
         if (player == null)
             return super.removedByPlayer(state, world, pos, null, willHarvest, fluid);

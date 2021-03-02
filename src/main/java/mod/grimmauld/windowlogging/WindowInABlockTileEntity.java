@@ -3,6 +3,7 @@ package mod.grimmauld.windowlogging;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.NetworkManager;
@@ -10,12 +11,14 @@ import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -32,13 +35,15 @@ public class WindowInABlockTileEntity extends TileEntity {
     private BlockState windowBlock = Blocks.AIR.getDefaultState();
     private CompoundNBT partialBlockTileData;
     private TileEntity partialBlockTileEntity = null;
-    @OnlyIn(value = Dist.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     private IModelData modelData;
+    @OnlyIn(Dist.CLIENT)
+    private static final Minecraft MC = Minecraft.getInstance();
 
     public WindowInABlockTileEntity() {
         super(RegistryEntries.WINDOW_IN_A_BLOCK_TILE_ENTITY);
         setPartialBlockTileData(new CompoundNBT());
-        DistExecutor.runWhenOn(Dist.CLIENT, () -> this::initDataMap);
+        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> this::initDataMap);
     }
 
     public CompoundNBT getPartialBlockTileData() {
@@ -131,7 +136,7 @@ public class WindowInABlockTileEntity extends TileEntity {
 
     @Nullable
     public TileEntity getPartialBlockTileEntityIfPresent() {
-        if (!getPartialBlock().hasTileEntity())
+        if (!getPartialBlock().hasTileEntity() || world == null)
             return null;
         if (partialBlockTileEntity == null) {
             try {
@@ -141,10 +146,27 @@ public class WindowInABlockTileEntity extends TileEntity {
                     partialBlockTileEntity.deserializeNBT(partialBlockTileData);
                     partialBlockTileEntity.setWorldAndPos(world, pos);
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 partialBlockTileEntity = null;
             }
         }
         return partialBlockTileEntity;
+    }
+
+    @Override
+    public void requestModelDataUpdate() {
+        try {
+            super.requestModelDataUpdate();
+        } catch (IllegalArgumentException e) {
+            if (!FMLEnvironment.dist.isClient())
+                return;
+            World world = this.world;
+            this.world = MC.world;
+            try {
+                super.requestModelDataUpdate();
+            } finally {
+                this.world = world;
+            }
+        }
     }
 }

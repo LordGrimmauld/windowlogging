@@ -9,4 +9,7 @@ public class RegistryEntries {
 
     @ObjectHolder(Windowlogging.MODID + ":window_in_a_block")
     public static TileEntityType<WindowInABlockTileEntity> WINDOW_IN_A_BLOCK_TILE_ENTITY;
+
+    private RegistryEntries() {
+    }
 }
