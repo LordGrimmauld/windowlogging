@@ -20,6 +20,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.IBlockReader;
 import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 
@@ -33,7 +34,7 @@ import static mod.grimmauld.windowlogging.WindowInABlockTileEntity.*;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class WindowInABlockModel extends WrappedBakedModel {
+public class WindowInABlockModel extends BakedModelWrapper<IBakedModel> {
     public WindowInABlockModel(IBakedModel original) {
         super(original);
     }

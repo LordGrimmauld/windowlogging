@@ -52,7 +52,6 @@ public class EventListener {
     public static void onModelBake(ModelBakeEvent event) {
         Map<ResourceLocation, IBakedModel> modelRegistry = event.getModelRegistry();
         swapModels(modelRegistry, getAllBlockStateModelLocations(RegistryEntries.WINDOW_IN_A_BLOCK), RegistryEntries.WINDOW_IN_A_BLOCK::createModel);
-
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -163,6 +162,9 @@ public class EventListener {
         public static void registerTEs(final RegistryEvent.Register<TileEntityType<?>> event) {
             Windowlogging.LOGGER.debug("TEs registering");
             event.getRegistry().register(TileEntityType.Builder.create(WindowInABlockTileEntity::new, RegistryEntries.WINDOW_IN_A_BLOCK).build(null).setRegistryName("window_in_a_block"));
+        }
+
+        private RegistryEvents() {
         }
     }
 }
