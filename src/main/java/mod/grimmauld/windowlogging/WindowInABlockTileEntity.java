@@ -18,7 +18,6 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -34,8 +33,6 @@ public class WindowInABlockTileEntity extends TileEntity {
     private BlockState windowBlock = Blocks.AIR.getDefaultState();
     private CompoundNBT partialBlockTileData;
     private TileEntity partialBlockTileEntity = null;
-    @OnlyIn(Dist.CLIENT)
-    private static final Minecraft MC = Minecraft.getInstance();
     @OnlyIn(value = Dist.CLIENT)
     private IModelData modelData;
 
@@ -143,9 +140,10 @@ public class WindowInABlockTileEntity extends TileEntity {
                 if (partialBlockTileEntity != null) {
                     partialBlockTileEntity.cachedBlockState = getPartialBlock();
                     partialBlockTileEntity.deserializeNBT(partialBlockTileData);
-                    partialBlockTileEntity.setWorldAndPos(world, pos);
+                    if (world != null)
+                        partialBlockTileEntity.setWorldAndPos(world, pos);
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 partialBlockTileEntity = null;
             }
         }
@@ -157,15 +155,18 @@ public class WindowInABlockTileEntity extends TileEntity {
 		try {
 			super.requestModelDataUpdate();
 		} catch (IllegalArgumentException e) {
-			if (!FMLEnvironment.dist.isClient())
-				return;
-			World world = this.world;
-			try {
-                this.world = MC.world;
-				super.requestModelDataUpdate();
-			} finally {
-				this.world = world;
-			}
+		    DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> this::requestModelUpdateOnClient);
 		}
 	}
+
+	@OnlyIn(Dist.CLIENT)
+	private void requestModelUpdateOnClient() {
+        World world = this.world;
+        try {
+            this.world = Minecraft.getInstance().world;
+            super.requestModelDataUpdate();
+        } finally {
+            this.world = world;
+        }
+    }
 }
