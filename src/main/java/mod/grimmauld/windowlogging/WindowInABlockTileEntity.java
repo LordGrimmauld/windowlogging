@@ -166,8 +166,8 @@ public class WindowInABlockTileEntity extends TileEntity {
 			if (!FMLEnvironment.dist.isClient())
 				return;
 			World world = this.world;
-			this.world = MC.world;
 			try {
+				this.world = MC.world;
 				super.requestModelDataUpdate();
 			} finally {
 				this.world = world;

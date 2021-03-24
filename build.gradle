@@ -8,11 +8,6 @@ buildscript {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
     }
 }
-
-plugins {
-    id "com.wynprice.cursemaven" version "2.1.5"
-}
-
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
@@ -71,11 +66,18 @@ minecraft {
     }
 }
 
+repositories {
+    maven {
+        url = "https://www.cursemaven.com"
+    }
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     // debug
     // runtimeOnly fg.deobf("curse.maven:doubleslabs:3058926")
+    // runtimeOnly fg.deobf("curse.maven:create-328085:3167528")
 }
 
 jar {
