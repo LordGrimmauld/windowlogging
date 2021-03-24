@@ -163,5 +163,8 @@ public class EventListener {
             Windowlogging.LOGGER.debug("TEs registering");
             event.getRegistry().register(TileEntityType.Builder.create(WindowInABlockTileEntity::new, RegistryEntries.WINDOW_IN_A_BLOCK).build(null).setRegistryName("window_in_a_block"));
         }
+
+        private RegistryEvents() {
+        }
     }
 }
