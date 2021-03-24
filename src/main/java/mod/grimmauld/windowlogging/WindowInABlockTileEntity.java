@@ -43,7 +43,7 @@ public class WindowInABlockTileEntity extends TileEntity {
     public WindowInABlockTileEntity() {
         super(RegistryEntries.WINDOW_IN_A_BLOCK_TILE_ENTITY);
         setPartialBlockTileData(new CompoundNBT());
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> this::initDataMap);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> this::initDataMap);
     }
 
     public CompoundNBT getPartialBlockTileData() {
