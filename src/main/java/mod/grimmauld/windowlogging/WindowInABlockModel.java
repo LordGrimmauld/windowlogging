@@ -87,7 +87,8 @@ public class WindowInABlockModel extends BakedModelWrapper<IBakedModel> {
 			dispatcher.getModelForState(windowState).getQuads(windowState, side, rand, glassModelData)
 				.forEach(bakedQuad -> {
 					if (!Block.hasSolidSide(partialState, world, position, bakedQuad.getFace())) {
-						fightZfighting(bakedQuad);
+						if (!(windowState.getBlock().equals(Blocks.IRON_BARS) && bakedQuad.getFace().getAxis().isVertical()))
+							fightZfighting(bakedQuad);
 						quads.add(bakedQuad);
 					}
 				});
