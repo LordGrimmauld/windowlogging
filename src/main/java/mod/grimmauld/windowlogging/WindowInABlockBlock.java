@@ -32,7 +32,6 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.extensions.IForgeBlock;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -44,47 +43,49 @@ import java.util.List;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @SuppressWarnings("deprecation")
-public class WindowInABlockBlock extends PaneBlock implements IForgeBlock {
+public class WindowInABlockBlock extends PaneBlock {
+
 	public WindowInABlockBlock() {
 		super(Properties.create(Material.ROCK).notSolid());
 	}
 
 	private static void addBlockHitEffects(ParticleManager manager, BlockPos pos, BlockRayTraceResult target, BlockState blockstate, ClientWorld world) {
+		VoxelShape shape = blockstate.getShape(world, pos);
+		if (shape.isEmpty())
+			return;
 		Direction side = target.getFace();
-		if (blockstate.getRenderType() != BlockRenderType.INVISIBLE) {
-			int i = pos.getX();
-			int j = pos.getY();
-			int k = pos.getZ();
-			AxisAlignedBB axisalignedbb = blockstate.getShape(world, pos).getBoundingBox();
-			double d0 = (double) i + manager.rand.nextDouble() * (axisalignedbb.maxX - axisalignedbb.minX - (double) 0.2F) + (double) 0.1F + axisalignedbb.minX;
-			double d1 = (double) j + manager.rand.nextDouble() * (axisalignedbb.maxY - axisalignedbb.minY - (double) 0.2F) + (double) 0.1F + axisalignedbb.minY;
-			double d2 = (double) k + manager.rand.nextDouble() * (axisalignedbb.maxZ - axisalignedbb.minZ - (double) 0.2F) + (double) 0.1F + axisalignedbb.minZ;
-			if (side == Direction.DOWN) {
-				d1 = (double) j + axisalignedbb.minY - (double) 0.1F;
-			}
-
-			if (side == Direction.UP) {
-				d1 = (double) j + axisalignedbb.maxY + (double) 0.1F;
-			}
-
-			if (side == Direction.NORTH) {
-				d2 = (double) k + axisalignedbb.minZ - (double) 0.1F;
-			}
-
-			if (side == Direction.SOUTH) {
-				d2 = (double) k + axisalignedbb.maxZ + (double) 0.1F;
-			}
-
-			if (side == Direction.WEST) {
-				d0 = (double) i + axisalignedbb.minX - (double) 0.1F;
-			}
-
-			if (side == Direction.EAST) {
-				d0 = (double) i + axisalignedbb.maxX + (double) 0.1F;
-			}
-
-			manager.addEffect((new DiggingParticle(world, d0, d1, d2, 0.0D, 0.0D, 0.0D, blockstate)).setBlockPos(pos).multiplyVelocity(0.2F).multipleParticleScaleBy(0.6F));
+		int i = pos.getX();
+		int j = pos.getY();
+		int k = pos.getZ();
+		AxisAlignedBB axisalignedbb = shape.getBoundingBox();
+		double d0 = (double) i + manager.rand.nextDouble() * (axisalignedbb.maxX - axisalignedbb.minX - (double) 0.2F) + (double) 0.1F + axisalignedbb.minX;
+		double d1 = (double) j + manager.rand.nextDouble() * (axisalignedbb.maxY - axisalignedbb.minY - (double) 0.2F) + (double) 0.1F + axisalignedbb.minY;
+		double d2 = (double) k + manager.rand.nextDouble() * (axisalignedbb.maxZ - axisalignedbb.minZ - (double) 0.2F) + (double) 0.1F + axisalignedbb.minZ;
+		if (side == Direction.DOWN) {
+			d1 = (double) j + axisalignedbb.minY - (double) 0.1F;
 		}
+
+		if (side == Direction.UP) {
+			d1 = (double) j + axisalignedbb.maxY + (double) 0.1F;
+		}
+
+		if (side == Direction.NORTH) {
+			d2 = (double) k + axisalignedbb.minZ - (double) 0.1F;
+		}
+
+		if (side == Direction.SOUTH) {
+			d2 = (double) k + axisalignedbb.maxZ + (double) 0.1F;
+		}
+
+		if (side == Direction.WEST) {
+			d0 = (double) i + axisalignedbb.minX - (double) 0.1F;
+		}
+
+		if (side == Direction.EAST) {
+			d0 = (double) i + axisalignedbb.maxX + (double) 0.1F;
+		}
+
+		manager.addEffect((new DiggingParticle(world, d0, d1, d2, 0.0D, 0.0D, 0.0D, blockstate)).setBlockPos(pos).multiplyVelocity(0.2F).multiplyParticleScaleBy(0.6F));
 	}
 
 	@Override
@@ -118,7 +119,8 @@ public class WindowInABlockBlock extends PaneBlock implements IForgeBlock {
 		for (AxisAlignedBB bb : windowBlock.getShape(world, pos).toBoundingBoxList()) {
 			if (bb.grow(.1d).contains(target.getHitVec().subtract(pos.getX(), pos.getY(), pos.getZ()))) {
 				windowBlock.getBlock().onBlockHarvested(world, pos, windowBlock, player);
-				Block.spawnDrops(windowBlock, world, pos, null, player, player.getHeldItemMainhand());
+				if (!player.isCreative())
+					Block.spawnDrops(windowBlock, world, pos, null, player, player.getHeldItemMainhand());
 				BlockState partialBlock = tileEntity.getPartialBlock();
 				world.setBlockState(pos, partialBlock);
 				for (Direction d : Direction.values()) {
@@ -188,7 +190,11 @@ public class WindowInABlockBlock extends PaneBlock implements IForgeBlock {
 			return Collections.emptyList();
 
 		WindowInABlockTileEntity te = (WindowInABlockTileEntity) tileentity;
+		TileEntity partialTE = te.getPartialBlockTileEntityIfPresent();
+		if (partialTE != null)
+			builder.withParameter(LootParameters.BLOCK_ENTITY, partialTE);
 		List<ItemStack> drops = te.getPartialBlock().getDrops(builder);
+		builder.withParameter(LootParameters.BLOCK_ENTITY, tileentity);
 		drops.addAll(te.getWindowBlock().getDrops(builder));
 		return drops;
 	}
@@ -313,13 +319,13 @@ public class WindowInABlockBlock extends PaneBlock implements IForgeBlock {
 		return new WindowInABlockModel(original);
 	}
 
-    @Override
-    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
-        WindowInABlockTileEntity te = getTileEntity(world, pos);
-        if (te != null) {
-            BlockState partialState = te.getPartialBlock();
-            partialState.getBlock().getLightValue(partialState, world, pos);
-        }
-        return 0;
-    }
+	@Override
+	public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
+		WindowInABlockTileEntity te = getTileEntity(world, pos);
+		if (te != null) {
+			BlockState partialState = te.getPartialBlock();
+			partialState.getBlock().getLightValue(partialState, world, pos);
+		}
+		return 0;
+	}
 }

@@ -13,6 +13,7 @@
     "#forge:fences/nether_brick"
   ],
   "optional": [
-    "doubleslabs:vertical_slab"
+    "doubleslabs:vertical_slab",
+    "#quark:vertical_slab"
   ]
 }

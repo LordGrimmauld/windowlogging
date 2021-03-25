@@ -5,7 +5,7 @@ loaderVersion = "[34,)"
 
 [[mods]]
 modId = "windowlogging"
-version = "0.0.3"
+version = "0.0.4"
 displayName = "Windowlogging"
 #updateJSONURL=""
 authors = "Simibubi, Grimmauld"

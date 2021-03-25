@@ -35,9 +35,9 @@ import static mod.grimmauld.windowlogging.WindowInABlockTileEntity.*;
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class WindowInABlockModel extends BakedModelWrapper<IBakedModel> {
-    public WindowInABlockModel(IBakedModel original) {
-        super(original);
-    }
+	public WindowInABlockModel(IBakedModel original) {
+		super(original);
+	}
 
     private static void fightZfighting(BakedQuad q) {
         int[] data = q.getVertexData();
@@ -52,13 +52,13 @@ public class WindowInABlockModel extends BakedModelWrapper<IBakedModel> {
             float z = Float.intBitsToFloat(data[j + 2]);
             double offset = q.getFace().getAxis().getCoordinate(x, y, z);
 
-            if (offset < 1 / 1024d || offset > 1023 / 1024d) {
-                data[j] = Float.floatToIntBits(x - 1 / 512f * dirX);
-                data[j + 1] = Float.floatToIntBits(y - 1 / 512f * dirY);
-                data[j + 2] = Float.floatToIntBits(z - 1 / 512f * dirZ);
-            }
-        }
-    }
+			if (offset < 1 / 1024d || offset > 1023 / 1024d) {
+				data[j] = Float.floatToIntBits(x - 1 / 512f * dirX);
+				data[j + 1] = Float.floatToIntBits(y - 1 / 512f * dirY);
+				data[j + 2] = Float.floatToIntBits(z - 1 / 512f * dirZ);
+			}
+		}
+	}
 
     private static boolean hasSolidSide(BlockState state, IBlockReader worldIn, BlockPos pos, Direction side) {
         return !state.getBlock().isIn(BlockTags.LEAVES) && Block.doesSideFillSquare(state.getCollisionShape(worldIn, pos), side);
@@ -91,7 +91,8 @@ public class WindowInABlockModel extends BakedModelWrapper<IBakedModel> {
             dispatcher.getModelForState(windowState).getQuads(windowState, side, rand, glassModelData)
                     .forEach(bakedQuad -> {
                         if (!hasSolidSide(partialState, world, position, bakedQuad.getFace())) {
-                            fightZfighting(bakedQuad);
+							if (!(windowState.getBlock().equals(Blocks.IRON_BARS) && bakedQuad.getFace().getAxis().isVertical()))
+                            	fightZfighting(bakedQuad);
                             quads.add(bakedQuad);
                         }
                     });
@@ -99,19 +100,19 @@ public class WindowInABlockModel extends BakedModelWrapper<IBakedModel> {
         return quads;
     }
 
-    @Override
-    public TextureAtlasSprite getParticleTexture(IModelData data) {
-        BlockRendererDispatcher dispatcher = Minecraft.getInstance().getBlockRendererDispatcher();
-        BlockState partialState = data.getData(PARTIAL_BLOCK);
-        TileEntity partialTE = data.getData(PARTIAL_TE);
-        if (partialState == null)
-            return super.getParticleTexture(data);
-        return dispatcher.getModelForState(partialState).getParticleTexture(partialTE == null ? data : partialTE.getModelData());
-    }
+	@Override
+	public TextureAtlasSprite getParticleTexture(IModelData data) {
+		BlockRendererDispatcher dispatcher = Minecraft.getInstance().getBlockRendererDispatcher();
+		BlockState partialState = data.getData(PARTIAL_BLOCK);
+		TileEntity partialTE = data.getData(PARTIAL_TE);
+		if (partialState == null)
+			return super.getParticleTexture(data);
+		return dispatcher.getModelForState(partialState).getParticleTexture(partialTE == null ? data : partialTE.getModelData());
+	}
 
-    @Override
-    public boolean isAmbientOcclusion() {
-        RenderType renderLayer = MinecraftForgeClient.getRenderLayer();
-        return renderLayer == RenderType.getSolid();
-    }
+	@Override
+	public boolean isAmbientOcclusion() {
+		RenderType renderLayer = MinecraftForgeClient.getRenderLayer();
+		return renderLayer == RenderType.getSolid();
+	}
 }

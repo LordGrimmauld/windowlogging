@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "#forge:glass_panes",
+    "minecraft:iron_bars"
+  ],
+  "optional": [
+  ]
+}
