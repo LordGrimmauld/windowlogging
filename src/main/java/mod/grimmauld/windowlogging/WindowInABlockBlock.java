@@ -110,7 +110,8 @@ public class WindowInABlockBlock extends PaneBlock {
 		for (AxisAlignedBB bb : windowBlock.getShape(world, pos).toBoundingBoxList()) {
 			if (bb.grow(.1d).contains(target.getHitVec().subtract(new Vec3d(pos)))) {
 				windowBlock.getBlock().onBlockHarvested(world, pos, windowBlock, player);
-				Block.spawnDrops(windowBlock, world, pos, null, player, player.getHeldItemMainhand());
+				if (!player.isCreative())
+					Block.spawnDrops(windowBlock, world, pos, null, player, player.getHeldItemMainhand());
 				BlockState partialBlock = tileEntity.getPartialBlock();
 				world.setBlockState(pos, partialBlock);
 				for (Direction d : Direction.values()) {
