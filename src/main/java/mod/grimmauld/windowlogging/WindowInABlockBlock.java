@@ -294,16 +294,16 @@ public class WindowInABlockBlock extends PaneBlock {
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	public boolean addHitEffects(BlockState state, World world, RayTraceResult target, ParticleManager manager) {
-        if (target.getType() != RayTraceResult.Type.BLOCK || !(target instanceof BlockRayTraceResult))
-            return false;
-        BlockPos pos = ((BlockRayTraceResult) target).getPos();
-        WindowInABlockTileEntity te = getTileEntity(world, pos);
-        if (te != null) {
-            te.getWindowBlock().addHitEffects(world, target, manager);
-            addBlockHitEffects(manager, pos, (BlockRayTraceResult) target, te.getWindowBlock(), world);
-            return te.getPartialBlock().addHitEffects(world, target, manager);
-        }
-        return false;
+		if (target.getType() != RayTraceResult.Type.BLOCK || !(target instanceof BlockRayTraceResult))
+			return false;
+		BlockPos pos = ((BlockRayTraceResult) target).getPos();
+		WindowInABlockTileEntity te = getTileEntity(world, pos);
+		if (te != null) {
+			te.getWindowBlock().addHitEffects(world, target, manager);
+			addBlockHitEffects(manager, pos, (BlockRayTraceResult) target, te.getWindowBlock(), world);
+			return te.getPartialBlock().addHitEffects(world, target, manager);
+		}
+		return false;
 	}
 
 	@OnlyIn(Dist.CLIENT)

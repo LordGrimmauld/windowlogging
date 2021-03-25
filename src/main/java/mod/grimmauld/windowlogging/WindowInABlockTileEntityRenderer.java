@@ -12,21 +12,21 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class WindowInABlockTileEntityRenderer extends TileEntityRenderer<WindowInABlockTileEntity> {
-    public WindowInABlockTileEntityRenderer(TileEntityRendererDispatcher rendererDispatcherIn) {
-        super(rendererDispatcherIn);
-    }
+	public WindowInABlockTileEntityRenderer(TileEntityRendererDispatcher rendererDispatcherIn) {
+		super(rendererDispatcherIn);
+	}
 
-    @Override
-    public void render(WindowInABlockTileEntity tileEntityIn, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, int combinedOverlayIn) {
-        TileEntity partialTE = tileEntityIn.getPartialBlockTileEntityIfPresent();
-        if (partialTE == null)
-            return;
-        TileEntityRenderer<TileEntity> renderer = TileEntityRendererDispatcher.instance.getRenderer(partialTE);
-        if (renderer == null)
-            return;
-        try {
-            renderer.render(partialTE, partialTicks, matrixStackIn, bufferIn, combinedLightIn, combinedOverlayIn);
-        } catch (Exception ignored) {
-        }
-    }
+	@Override
+	public void render(WindowInABlockTileEntity tileEntityIn, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, int combinedOverlayIn) {
+		TileEntity partialTE = tileEntityIn.getPartialBlockTileEntityIfPresent();
+		if (partialTE == null)
+			return;
+		TileEntityRenderer<TileEntity> renderer = TileEntityRendererDispatcher.instance.getRenderer(partialTE);
+		if (renderer == null)
+			return;
+		try {
+			renderer.render(partialTE, partialTicks, matrixStackIn, bufferIn, combinedLightIn, combinedOverlayIn);
+		} catch (Exception ignored) {
+		}
+	}
 }
