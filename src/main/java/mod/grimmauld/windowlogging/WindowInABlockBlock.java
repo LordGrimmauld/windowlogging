@@ -182,7 +182,11 @@ public class WindowInABlockBlock extends PaneBlock {
 			return Collections.emptyList();
 
 		WindowInABlockTileEntity te = (WindowInABlockTileEntity) tileentity;
+		TileEntity partialTE = te.getPartialBlockTileEntityIfPresent();
+		if (partialTE != null)
+			builder.withParameter(LootParameters.BLOCK_ENTITY, partialTE);
 		List<ItemStack> drops = te.getPartialBlock().getDrops(builder);
+		builder.withParameter(LootParameters.BLOCK_ENTITY, tileentity);
 		drops.addAll(te.getWindowBlock().getDrops(builder));
 		return drops;
 	}
