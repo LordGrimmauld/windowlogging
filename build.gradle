@@ -76,8 +76,9 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     // debug
-    // runtimeOnly fg.deobf("curse.maven:doubleslabs:3058926")
-    // runtimeOnly fg.deobf("curse.maven:create-328085:3167528")
+    runtimeOnly fg.deobf("curse.maven:doubleslabs:3058926")
+    runtimeOnly fg.deobf("curse.maven:create-328085:3167528")
+    runtimeOnly fg.deobf("curse.maven:quark-243121:2980651")
 }
 
 jar {
