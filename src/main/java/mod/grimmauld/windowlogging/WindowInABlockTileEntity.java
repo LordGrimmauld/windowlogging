@@ -18,7 +18,6 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -31,8 +30,6 @@ public class WindowInABlockTileEntity extends TileEntity {
 	public static final ModelProperty<BlockState> WINDOW_BLOCK = new ModelProperty<>();
 	public static final ModelProperty<BlockPos> POSITION = new ModelProperty<>();
 	public static final ModelProperty<TileEntity> PARTIAL_TE = new ModelProperty<>();
-	@OnlyIn(Dist.CLIENT)
-	private static final Minecraft MC = Minecraft.getInstance();
 	private BlockState partialBlock = Blocks.AIR.getDefaultState();
 	private BlockState windowBlock = Blocks.AIR.getDefaultState();
 	private CompoundNBT partialBlockTileData;
@@ -163,15 +160,18 @@ public class WindowInABlockTileEntity extends TileEntity {
 		try {
 			super.requestModelDataUpdate();
 		} catch (IllegalArgumentException e) {
-			if (!FMLEnvironment.dist.isClient())
-				return;
-			World world = this.world;
-			try {
-				this.world = MC.world;
-				super.requestModelDataUpdate();
-			} finally {
-				this.world = world;
-			}
+			DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> this::requestModelUpdateOnClient);
+		}
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	private void requestModelUpdateOnClient() {
+		World world = this.world;
+		try {
+			this.world = Minecraft.getInstance().world;
+			super.requestModelDataUpdate();
+		} finally {
+			this.world = world;
 		}
 	}
 }
