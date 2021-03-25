@@ -81,6 +81,7 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:quark-243121:2980651")
     runtimeOnly fg.deobf("curse.maven:areg-250363:2911830")
     runtimeOnly fg.deobf("curse.maven:blockcarpentry-401658:3147275")
+    runtimeOnly fg.deobf("curse.maven:paneintheglass-374529:3007447")
 }
 
 jar {

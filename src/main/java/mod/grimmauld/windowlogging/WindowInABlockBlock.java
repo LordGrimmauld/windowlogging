@@ -47,11 +47,14 @@ public class WindowInABlockBlock extends PaneBlock {
 	}
 
 	private static void addBlockHitEffects(ParticleManager manager, BlockPos pos, BlockRayTraceResult target, BlockState blockstate, World world) {
+		VoxelShape shape = blockstate.getShape(world, pos);
+		if (shape.isEmpty())
+			return;
 		Direction side = target.getFace();
 		int i = pos.getX();
 		int j = pos.getY();
 		int k = pos.getZ();
-		AxisAlignedBB axisalignedbb = blockstate.getShape(world, pos).getBoundingBox();
+		AxisAlignedBB axisalignedbb = shape.getBoundingBox();
 		double d0 = (double) i + manager.rand.nextDouble() * (axisalignedbb.maxX - axisalignedbb.minX - (double) 0.2F) + (double) 0.1F + axisalignedbb.minX;
 		double d1 = (double) j + manager.rand.nextDouble() * (axisalignedbb.maxY - axisalignedbb.minY - (double) 0.2F) + (double) 0.1F + axisalignedbb.minY;
 		double d2 = (double) k + manager.rand.nextDouble() * (axisalignedbb.maxZ - axisalignedbb.minZ - (double) 0.2F) + (double) 0.1F + axisalignedbb.minZ;
